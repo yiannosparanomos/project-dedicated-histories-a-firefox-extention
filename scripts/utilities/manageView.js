@@ -1,4 +1,9 @@
-import {populateContainerList} from '../utilities/general.js';
+import {populateContainerList, displayError, getExistingProfiles} from '../utilities/general.js';
+
+const notify = (message) => {
+    // Simple user-facing notification
+    alert(message);
+};
 
 
 async function closeTabsForProfile(profileToDelete) {
@@ -37,6 +42,15 @@ const deleteIndexedDBHistory = async (profile) => {
     });
 };
 
+const refreshContainerLists = async () => {
+    const containerList = document.getElementById('containerListId');
+    const containersListView = document.getElementById('containersListViewId');
+    const manageContainerList = document.getElementById('manageContainerListId');
+    if (containerList && containersListView && manageContainerList) {
+        await populateContainerList(containerList, containersListView, manageContainerList);
+    }
+};
+
 const executeProfileDeletion = async (selectedProfileKey, profiles) => {
     try {
         if (selectedProfileKey === "allProfiles") {
@@ -67,7 +81,7 @@ const executeProfileDeletion = async (selectedProfileKey, profiles) => {
 };
 
 const handleDeleteProfile = async () => {
-    // const selectedProfileKey = profileDeleteSelect.value;
+    // TODO: wire UI selection; defaulting to delete all for now
     const selectedProfileKey = "allProfiles";
     const profiles = await getExistingProfiles();
 
@@ -77,10 +91,66 @@ const handleDeleteProfile = async () => {
     try {
         await executeProfileDeletion(selectedProfileKey, profiles);
         // await populateDeleteDropdown();
-        await populateContainerList();  
+        await refreshContainerLists();
     } catch (error) {
         console.error("Error deleting profile:", error);
         displayError("Failed to delete profile. Please try again.");
     }
 };
 
+const handleClearHistory = async (profile) => {
+    try {
+        await deleteIndexedDBHistory(profile);
+        await refreshContainerLists();
+        notify(`History cleared (or none existed) for "${profile.profileName}".`);
+    } catch (error) {
+        console.error("Error clearing history:", error);
+        displayError("Failed to clear history. Please try again.");
+        notify("Failed to clear history. Please try again.");
+    }
+};
+
+const handleManageActionClick = async (event) => {
+    const actionIcon = event.target.closest('.manageActionIcon');
+    if (!actionIcon) return;
+
+    const manageRow = event.target.closest('[data-key]');
+    if (!manageRow) return displayError("Profile not found.");
+
+    const profileKey = manageRow.getAttribute('data-key');
+    const profiles = await getExistingProfiles();
+    const profile = profiles.find(p => p.key === profileKey);
+    if (!profile) return displayError("Profile not found.");
+
+    const imgSrc = actionIcon.querySelector('img')?.src || '';
+
+    if (imgSrc.includes('trash')) {
+        if (confirm(`Delete profile "${profile.profileName}"?`)) {
+            await executeProfileDeletion(profileKey, profiles);
+            await refreshContainerLists();
+            notify(`Profile "${profile.profileName}" deleted.`);
+        }
+    } else if (imgSrc.includes('clear')) {
+        if (confirm(`Clear history for "${profile.profileName}"?`)) {
+            await handleClearHistory(profile);
+        }
+    } else if (imgSrc.includes('customize')) {
+        displayError("Customize behaviour is not implemented yet.");
+        notify("Customize behaviour is not implemented yet.");
+    }
+};
+
+// Initialize manage view listeners after views are loaded
+export const initManageViewListeners = () => {
+    const deleteAllBtn = document.getElementById('deleteAllProfiles');
+    if (deleteAllBtn && !deleteAllBtn.dataset.bound) {
+        deleteAllBtn.addEventListener('click', handleDeleteProfile);
+        deleteAllBtn.dataset.bound = "true";
+    }
+
+    const manageContainerList = document.getElementById('manageContainerListId');
+    if (manageContainerList && !manageContainerList.dataset.bound) {
+        manageContainerList.addEventListener('click', handleManageActionClick);
+        manageContainerList.dataset.bound = "true";
+    }
+};

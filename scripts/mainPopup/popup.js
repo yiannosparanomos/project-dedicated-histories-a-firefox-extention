@@ -1,6 +1,7 @@
 import {handleGoToView, populateContainerList} from '../utilities/general.js'
 import {handleCreateProfile, handleEnterKeyForProfile, handleProfileCardFocusIn, handleProfileCardFocusOut, handleProfileCardClick} from '../utilities/createView.js'
 import {filterContainerList, handleSearchHistory, displayProfileHistory} from '../utilities/historyView.js'
+import {initManageViewListeners} from '../utilities/manageView.js'
 
 
 // Global Variables
@@ -216,6 +217,7 @@ async function initializeApp() {
 
         attachEventListeners(); 
         await populateContainerList(popupContainerList, containersListView, manageContainerList);
+        initManageViewListeners();
         handleGoToView("mainView")
 
 
@@ -234,4 +236,3 @@ if (document.readyState === 'loading') {
 
 
 export {initialGroupStates, views, openInSelectedProfile};
-

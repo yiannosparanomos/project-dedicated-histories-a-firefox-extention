@@ -1,5 +1,5 @@
 {
-  "manifest_version": 3,
+  "manifest_version": 2,
   "name": "Container Profile Manager",
   "version": "1.0",
   "description": "Manages isolated profiles with password protection.",
@@ -13,7 +13,7 @@
     "commands"
   ],
 
-  "action": {
+  "browser_action": {
     "default_popup": "./views/popup.html",
     "default_icon": {
       "16": "icons/history-mod.png",
@@ -31,14 +31,12 @@
   },
 
   "web_accessible_resources": [
-    {
-      "resources": ["scripts/mainPopup/popup.js", "scripts/utilities/createView.js",
-        "scripts/utilities/general.js", "scripts/utilities/historyView.js",
-        "scripts/utilities/manageView.js", "scripts/background.js"
-      ],
-    "matches": ["<all_urls>"]
-    
-    }
+    "scripts/mainPopup/popup.js",
+    "scripts/utilities/createView.js",
+    "scripts/utilities/general.js",
+    "scripts/utilities/historyView.js",
+    "scripts/utilities/manageView.js",
+    "scripts/background.js"
   ]
   
 }

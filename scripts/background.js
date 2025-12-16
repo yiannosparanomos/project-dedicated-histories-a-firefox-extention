@@ -1,4 +1,5 @@
-browser.action.setIcon({ path: "../icons/history-mod.png" });
+// MV2 background uses browserAction; keep icon setup here (popup handles its own icon via manifest)
+browser.browserAction.setIcon({ path: "../icons/history-mod.png" });
 
 let lastActiveTabId = null;
 const storeName = "history";

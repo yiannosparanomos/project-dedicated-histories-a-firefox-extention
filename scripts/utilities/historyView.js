@@ -1,5 +1,25 @@
 import {initialGroupStates, openInSelectedProfile} from '../mainPopup/popup.js';
-// import {openDatabase} from '../background.js';
+
+const storeName = "history";
+
+// Local copy of openDatabase (background.js is not a module, so re-use the logic here)
+function openDatabase(dbName) {
+    const version = 1;
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open(dbName, version);
+        request.onerror = event => {
+            console.error("Database error: ", event.target.error);
+            reject(event.target.error);
+        };
+        request.onsuccess = event => resolve(event.target.result);
+        request.onupgradeneeded = event => {
+            const db = event.target.result;
+            if (!db.objectStoreNames.contains(storeName)) {
+                db.createObjectStore(storeName, { keyPath: "id", autoIncrement: true });
+            }
+        };
+    });
+}
 
 export  async function profileForHistory() {
     const [currentTab] = await browser.tabs.query({ active: true, currentWindow: true });
@@ -335,4 +355,3 @@ function createHistoryEntryDiv(entry) {
 
     return div;
 }
-

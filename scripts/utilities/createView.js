@@ -30,6 +30,11 @@ export const handleCreateProfile = async (profileNameInput, popupContainerList, 
     if (!profileName) return displayExistingProfileError("Something is missing...");
     if (await isNameExists(profileName)) return displayExistingProfileError("Be more unique!");
 
+    // Ensure contextual identities/containers are available
+    if (!browser.contextualIdentities || !browser.contextualIdentities.create) {
+        return displayExistingProfileError("Enable Firefox containers (about:config)");
+    }
+
     // Capture the selected color
     const selectedColorBehindElement = document.querySelector('.colorGroup .colors .colorWrapper .colorBehind.selected');
 
@@ -52,9 +57,11 @@ export const handleCreateProfile = async (profileNameInput, popupContainerList, 
         color: selectedColor,      
         icon: containerIcon         
     });
-    if (response) {
-        populateContainerList(popupContainerList, containersListView, manageContainerList);
+    if (response && response.success !== false) {
+        await populateContainerList(popupContainerList, containersListView, manageContainerList);
         handleGoToView("mainView");
+    } else {
+        displayExistingProfileError("Failed to create profile");
     }
     // console.log('profile created: ', response, ' with name: ', profileName, ' color: ', selectedColor, ' icon: ', selectedIcon);
     resetSelections(profileNameInput);

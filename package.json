@@ -1,0 +1,12 @@
+{
+  "name": "container-profile-manager",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "web-ext run --source-dir . --pref privacy.userContext.enabled=true --pref privacy.userContext.ui.enabled=true",
+    "lint": "web-ext lint --source-dir ."
+  },
+  "devDependencies": {
+    "web-ext": "^7.11.0"
+  }
+}
